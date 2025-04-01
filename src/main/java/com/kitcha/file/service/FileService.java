@@ -2,6 +2,7 @@ package com.kitcha.file.service;
 
 import com.kitcha.file.dto.FileCreateEvent;
 import com.kitcha.file.entity.File;
+import com.kitcha.file.kafka.producer.FileProducer;
 import com.kitcha.file.repository.FileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -30,6 +31,9 @@ public class FileService {
 
     @Autowired
     private S3Service s3Service;
+
+    @Autowired
+    private FileProducer fileProducer;
 
     // PDF 바이트 배열
     private byte[] getPdfBytes(PDDocument document) throws IOException {
@@ -116,7 +120,8 @@ public class FileService {
             file.setBoardId(board.getBoardId());
             file.setFileName(board.getNewsTitle());
             file.setFilePath(s3Path);
-            fileRepository.save(file);
+//            fileRepository.save(file);
+            fileProducer.send("file", file);
 
         } catch (IOException e) {
             e.printStackTrace();
